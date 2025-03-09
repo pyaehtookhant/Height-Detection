@@ -15,7 +15,7 @@ def detect_a4_paper(frame):
     # Convert to HSV and threshold for white paper
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_white = np.array([0, 0, 200])
-    upper_white = np.array([255, 30, 255])
+    upper_white = np.array([255, 50, 255])
     mask = cv2.inRange(hsv, lower_white, upper_white)
     
     # Find contours
