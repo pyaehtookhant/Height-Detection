@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Height Measurement System</title>
+    <style>
+        .container { text-align: center; margin: 20px; }
+        #videoFeed { border: 2px solid #333; margin: 10px; max-width: 80%; }
+        .controls { margin: 20px; }
+        button { padding: 12px 24px; font-size: 16px; margin: 0 10px; 
+                cursor: pointer; background: #4CAF50; color: white; 
+                border: none; border-radius: 4px; }
+        button:disabled { background: #cccccc; cursor: not-allowed; }
+        #heightDisplay { font-size: 24px; margin: 20px; color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Height Measurement System</h1>
+        <div class="controls">
+            <button id="startBtn" onclick="startSystem()">Start System</button>
+            <button id="stopBtn" onclick="stopSystem()" disabled>Stop System</button>
+        </div>
+        <img id="videoFeed" src="{{ url_for('video_feed') }}">
+        <div id="heightDisplay">Current Height: <span id="heightValue">N/A</span></div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const heightValue = document.getElementById('heightValue');
+
+        function updateUI() {
+            startBtn.disabled = heightData.is_active;
+            stopBtn.disabled = !heightData.is_active;
+        }
+
+        function updateHeight() {
+            fetch('/get_height')
+                .then(r => r.json())
+                .then(data => {
+                    heightValue.textContent = data.height;
+                    if (data.is_active) setTimeout(updateHeight, 500);
+                });
+        }
+
+        function startSystem() {
+            fetch('/start', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                heightData.is_active = true;
+                updateUI();
+                updateHeight();
+            });
+        }
+
+        function stopSystem() {
+            fetch('/stop', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                heightData.is_active = false;
+                heightValue.textContent = 'N/A';
+                updateUI();
+            });
+        }
+
+        // Initial state
+        const heightData = { is_active: false };
+        updateUI();
+    </script>
+</body>
+</html>
